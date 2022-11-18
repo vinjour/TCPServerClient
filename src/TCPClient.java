@@ -9,28 +9,28 @@ public class TCPClient {
 
         String hostname = args[0];
         int port = Integer.parseInt(args[1]);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         try (Socket socket = new Socket(hostname, port)) {
 
             OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
 
-            Console console = System.console();
             String text;
 
             do {
-                text = console.readLine("Enter text: ");
 
-                writer.println(text);
+                text = ("Enter message : ");
+                System.out.print(text);
+
+                //On récupère le message
 
                 InputStream input = socket.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
                 String time = reader.readLine();
 
                 System.out.println(time);
 
-            } while (!text.equals("bye"));
+            } while (!reader.equals("bye"));
 
             socket.close();
 
