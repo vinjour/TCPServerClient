@@ -2,33 +2,73 @@ import java.io.*;
 import java.net.*;
 
 
-public class ConnectionThread extend Thread {
+public class ConnectionThread extends Thread {
     private Socket socket = null;
+    public InputStream input = null;
 
-    public ConnectionThread(Socket socket) {
-        super("TCPServer");
+    public ConnectionThread(Socket socket, InputStream input) {
+        super("TCPMultiServer");
         this.socket = socket;
+        this.input = input;
     }
 
-    System.out.println("Server is listening on port " + port);
+    public void run() {
 
-    Socket socket = serverSocket.accept();
-        System.out.println("New client connected\n");
+        try () {
 
-    InputStream input = socket.getInputStream();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            boolean connected = true;
 
-    OutputStream output = socket.getOutputStream();
-    PrintWriter writer = new PrintWriter(output, true);
+            System.out.println("New client connected\n");
 
-    InetAddress IPclient = socket.getInetAddress();
-    int clientPort = socket.getPort();
+            InputStream input = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-        while (connected) {
-        String text = reader.readLine();
+            OutputStream output = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(output, true);
 
-        System.out.println("From client at: " + IPclient + ":" + clientPort);
-        System.out.println(text+"\n");
-        writer.println(text);
+            InetAddress IPclient = socket.getInetAddress();
+            int clientPort = socket.getPort();
+
+            while (connected) {
+
+                String text = reader.readLine();
+
+                System.out.println("From client at: " + IPclient + ":" + clientPort);
+                System.out.println(text+"\n");
+                writer.println(text);
+
+                if (!reader.equals("bye")) {
+                    break;
+                }
+            }
+            connected = false;
+            socket.close();
+
+        } catch (IOException ex) {
+            System.out.println("Server exception: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    public void launch() {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+
+            boolean connected = true;
+
+            socket = serverSocket.accept();
+            System.out.println("New client connected\n");
+
+            InputStream input = socket.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+
+            OutputStream output = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(output, true);
+
+            InetAddress IPclient = socket.getInetAddress();
+            int clientPort = socket.getPort();
+        } catch (IOException ex) {
+            System.out.println("Server exception: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 }

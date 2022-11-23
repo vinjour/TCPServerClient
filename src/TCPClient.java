@@ -38,7 +38,7 @@ public class TCPClient {
                 System.out.println("\nFrom server at: " + IPaddress + ":" + port);
                 System.out.println(ReceivedMessage + "\n");
 
-                if (readMsgToSend.equals("bye")) {
+                if (!readMsgToSend.equals("bye")) {
                     break;
                 }
             }
