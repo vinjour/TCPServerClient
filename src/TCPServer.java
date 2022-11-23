@@ -14,7 +14,7 @@ public class TCPServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("New client connected");
+                System.out.println("New client connected\n");
 
                 InputStream input = socket.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -22,12 +22,16 @@ public class TCPServer {
                 OutputStream output = socket.getOutputStream();
                 PrintWriter writer = new PrintWriter(output, true);
 
+                InetAddress IPclient = socket.getInetAddress();
+                int clientPort = socket.getPort();
 
                 String text = null;
 
                 do {
                     text = reader.readLine();
-                    System.out.println(text);
+
+                    System.out.println("From client at: " + IPclient + ":" + clientPort);
+                    System.out.println(text+"\n");
                     writer.println(text);
 
                 } while (!text.equals("bye"));

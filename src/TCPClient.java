@@ -29,10 +29,10 @@ public class TCPClient {
                 writer.println(SendMessage);
 
                 String ReceivedMessage = readMsgReceived.readLine();
-                System.out.println("From server at: " + IPaddress + ":" + port);
-                System.out.println(ReceivedMessage);
+                System.out.println("\nFrom server at: " + IPaddress + ":" + port);
+                System.out.println(ReceivedMessage+"\n");
 
-            } while (!readMsgReceived.equals("bye"));
+            } while (!readMsgToSend.equals("bye"));
 
             socket.close();
 
