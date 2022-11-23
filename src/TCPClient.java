@@ -6,8 +6,15 @@ public class TCPClient {
 
     public static void main(String[] args) {
 
+        if (args.length != 2) {
+            System.err.println("Usage: java TCPclient <IPaddress> <port>");
+            System.exit(1);
+        }
+
         String IPaddress = args[0];
         int port = Integer.parseInt(args[1]);
+        boolean connected = true;
+
         BufferedReader readMsgToSend = new BufferedReader(new InputStreamReader(System.in));
 
         try (Socket socket = new Socket(IPaddress, port)) {
@@ -20,8 +27,7 @@ public class TCPClient {
             BufferedReader readMsgReceived = new BufferedReader(new InputStreamReader(input));
 
 
-            do {
-
+            while (connected) {
                 System.out.print("Enter message : ");
 
                 String SendMessage = readMsgToSend.readLine();
@@ -30,10 +36,13 @@ public class TCPClient {
 
                 String ReceivedMessage = readMsgReceived.readLine();
                 System.out.println("\nFrom server at: " + IPaddress + ":" + port);
-                System.out.println(ReceivedMessage+"\n");
+                System.out.println(ReceivedMessage + "\n");
 
-            } while (!readMsgToSend.equals("bye"));
-
+                if (readMsgToSend.equals("bye")) {
+                    break;
+                }
+            }
+            connected = false;
             socket.close();
 
         } catch (UnknownHostException ex) {
