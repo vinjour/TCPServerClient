@@ -23,11 +23,12 @@ public class TCPServer {
                 PrintWriter writer = new PrintWriter(output, true);
 
 
-                String text;
+                String text = null;
 
                 do {
                     text = reader.readLine();
-                    writer.println("Server: " + text);
+                    System.out.println(text);
+                    writer.println(text);
 
                 } while (!text.equals("bye"));
 

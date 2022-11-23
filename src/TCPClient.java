@@ -5,32 +5,34 @@ import java.io.*;
 public class TCPClient {
 
     public static void main(String[] args) {
-        if (args.length < 2) return;
 
-        String hostname = args[0];
+        String IPaddress = args[0];
         int port = Integer.parseInt(args[1]);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader readMsgToSend = new BufferedReader(new InputStreamReader(System.in));
 
-        try (Socket socket = new Socket(hostname, port)) {
+        try (Socket socket = new Socket(IPaddress, port)) {
 
             OutputStream output = socket.getOutputStream();
+            PrintWriter writer = new PrintWriter(output, true);
 
-            String text;
+            //On récupère le message
+            InputStream input = socket.getInputStream();
+            BufferedReader readMsgReceived = new BufferedReader(new InputStreamReader(input));
+
 
             do {
 
-                text = ("Enter message : ");
-                System.out.print(text);
+                System.out.print("Enter message : ");
 
-                //On récupère le message
+                String SendMessage = readMsgToSend.readLine();
 
-                InputStream input = socket.getInputStream();
+                writer.println(SendMessage);
 
-                String time = reader.readLine();
+                String ReceivedMessage = readMsgReceived.readLine();
+                System.out.println("From server at: " + IPaddress + ":" + port);
+                System.out.println(ReceivedMessage);
 
-                System.out.println(time);
-
-            } while (!reader.equals("bye"));
+            } while (!readMsgReceived.equals("bye"));
 
             socket.close();
 
