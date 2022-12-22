@@ -6,13 +6,12 @@ public class TCPServer {
 
     ServerSocket serverSocket;
     Socket clientSocket;
-    InputStream input;
-    OutputStream output;
-    BufferedReader reader;
+    InputStream receiveData;
+    OutputStream sendData;
+    BufferedReader readMsgReceived;
     PrintWriter writer;
 
-    InetAddress clientAddress;
-    int clientPort;
+    static int serverPort;
 
     public TCPServer(int serverPort) {
         try {
@@ -26,7 +25,7 @@ public class TCPServer {
             System.err.println(ex);
             System.exit(1);
         }
-        
+
         System.out.println("Server is listening on port " + serverPort);
     }
 
@@ -36,33 +35,29 @@ public class TCPServer {
         while (listening) {
 
             clientSocket = serverSocket.accept();
-            System.out.println("New client connected\n");
-            String sentence = getBufferedReader(clientSocket);
-            getPrintWriter(clientSocket, sentence);
+            String sentence = receiveMessage(clientSocket);
+            sendMessage(clientSocket, sentence);
         }
         serverSocket.close();
     }
 
+    private String receiveMessage(Socket socket) throws IOException {
+        InetAddress clientAddress = socket.getInetAddress();
+        int clientPort = socket.getPort();
 
-    private void getPrintWriter(Socket socket, String text2) throws IOException {
-        output = socket.getOutputStream();
-        writer = new PrintWriter(output, true);
-        writer.println(text2);
-    }
-
-    private String getBufferedReader(Socket socket) throws IOException {
-
-
-        input = socket.getInputStream();
-        clientAddress = socket.getInetAddress();
-        clientPort = socket.getPort();
-
-        reader = new BufferedReader(new InputStreamReader(input));
-        String sentence = reader.readLine();
+        receiveData = socket.getInputStream();
+        readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
+        String sentence = readMsgReceived.readLine();
 
         System.out.println("From client at: " + clientAddress + ":" + clientPort);
         System.out.println(sentence+"\n");
         return sentence;
+    }
+
+    private void sendMessage(Socket socket, String sentence) throws IOException {
+        sendData = socket.getOutputStream();
+        writer = new PrintWriter(sendData, true);
+        writer.println(sentence);
     }
 
     public static void main(String args[]) throws Exception {
@@ -72,7 +67,8 @@ public class TCPServer {
             System.exit(1);
         }
 
-        int serverPort = Integer.parseInt(args[0]);
+        serverPort = Integer.parseInt(args[0]);
+
         TCPServer tcpServer = new TCPServer(serverPort);
         tcpServer.launch();
     }
