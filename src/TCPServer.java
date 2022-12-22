@@ -5,55 +5,67 @@ import java.net.*;
 public class TCPServer {
 
     ServerSocket serverSocket;
-    Socket socket;
+    Socket clientSocket;
+    InputStream input;
+    OutputStream output;
+    BufferedReader reader;
+    PrintWriter writer;
+
+    InetAddress clientAddress;
+    int clientPort;
 
     public TCPServer(int serverPort) {
         try {
             serverSocket = new ServerSocket(serverPort);
-        } catch (IOException ex) {
-            System.out.println("Server exception: " + ex.getMessage());
-            ex.printStackTrace();
-        }
 
+        } catch (SocketException ex) {
+            System.err.println(ex);
+            System.exit(1);
+
+        }catch (IOException ex) {
+            System.err.println(ex);
+            System.exit(1);
+        }
+        
         System.out.println("Server is listening on port " + serverPort);
     }
 
     public void launch() throws IOException {
-        boolean keepListening = true;
+        boolean listening = true;
 
-        while (keepListening) {
+        while (listening) {
 
-            socket = serverSocket.accept();
+            clientSocket = serverSocket.accept();
             System.out.println("New client connected\n");
-            String sentence = getBufferedReader(socket);
-            getPrintWriter(socket, sentence);
+            String sentence = getBufferedReader(clientSocket);
+            getPrintWriter(clientSocket, sentence);
         }
         serverSocket.close();
     }
 
 
-    private static void getPrintWriter(Socket socket, String text2) throws IOException {
-        OutputStream output = socket.getOutputStream();
-        PrintWriter writer = new PrintWriter(output, true);
+    private void getPrintWriter(Socket socket, String text2) throws IOException {
+        output = socket.getOutputStream();
+        writer = new PrintWriter(output, true);
         writer.println(text2);
     }
 
     private String getBufferedReader(Socket socket) throws IOException {
 
 
-        InputStream input = socket.getInputStream();
-        InetAddress IPclient = socket.getInetAddress();
-        int clientPort = socket.getPort();
+        input = socket.getInputStream();
+        clientAddress = socket.getInetAddress();
+        clientPort = socket.getPort();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        reader = new BufferedReader(new InputStreamReader(input));
         String sentence = reader.readLine();
 
-        System.out.println("From client at: " + IPclient + ":" + clientPort);
+        System.out.println("From client at: " + clientAddress + ":" + clientPort);
         System.out.println(sentence+"\n");
         return sentence;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String args[]) throws Exception {
 
         if (args.length != 1) {
             System.err.println("Usage: java TCPServer <port>");

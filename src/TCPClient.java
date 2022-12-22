@@ -4,53 +4,77 @@ import java.io.*;
 
 public class TCPClient {
 
-    public static void main(String[] args) {
+    Socket clientSocket;
+    BufferedReader readMsgToSend;
+    BufferedReader readMsgReceived;
+    OutputStream output;
+    PrintWriter writer;
+    InputStream input;
 
-        if (args.length != 2) {
-            System.err.println("Usage: java TCPclient <IPaddress> <port>");
+    static String serverAddress;
+    static int serverPort;
+    static int TIMER_SIZE = 10000;  // Milliseconds
+
+    public TCPClient(String serverAddress, int serverPort) throws IOException {
+        try {
+            clientSocket = new Socket(serverAddress, serverPort);
+
+        } catch (SocketException ex) {
+            System.err.println(ex);
+            System.exit(1);
+
+        } catch (IOException ex) {
+            System.err.println(ex);
             System.exit(1);
         }
 
-        String IPaddress = args[0];
-        int port = Integer.parseInt(args[1]);
+        readMsgToSend = new BufferedReader(new InputStreamReader(System.in));
+
+    }
+
+    private void run() throws IOException {
+
         boolean connected = true;
 
-        BufferedReader readMsgToSend = new BufferedReader(new InputStreamReader(System.in));
+        while (connected) {
 
-        try (Socket socket = new Socket(IPaddress, port)) {
-
-            OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
-
-            InputStream input = socket.getInputStream();
-            BufferedReader readMsgReceived = new BufferedReader(new InputStreamReader(input));
-
-
-            while (connected) {
-                System.out.print("Enter message : ");
-
-                String SendMessage = readMsgToSend.readLine();
-
-                writer.println(SendMessage);
-
-                String ReceivedMessage = readMsgReceived.readLine();
-                System.out.println("\nFrom server at: " + IPaddress + ":" + port);
-                System.out.println(ReceivedMessage + "\n");
-
-                if (!readMsgToSend.equals("bye")) {
-                    break;
-                }
-            }
-            connected = false;
-            socket.close();
-
-        } catch (UnknownHostException ex) {
-
-            System.out.println("Server not found: " + ex.getMessage());
-
-        } catch (IOException ex) {
-
-            System.out.println("I/O error: " + ex.getMessage());
+            sendMessage();
+            clientSocket.setSoTimeout(TIMER_SIZE);
+            receiveMessage();
         }
+        connected = false;
+        clientSocket.close();
+    }
+
+    private void sendMessage() throws IOException {
+        System.out.print("Enter message : ");
+
+        String SendMessage = readMsgToSend.readLine();
+        output = clientSocket.getOutputStream();
+        writer = new PrintWriter(output, true);
+        writer.println(SendMessage);
+    }
+
+    private void receiveMessage() throws IOException {
+        input = clientSocket.getInputStream();
+        readMsgReceived = new BufferedReader(new InputStreamReader(input));
+        String ReceivedMessage = readMsgReceived.readLine();
+
+        System.out.println("\nFrom server at: " + serverAddress + ":" + serverPort);
+        System.out.println(ReceivedMessage + "\n");
+    }
+
+    public static void main(String args[]) throws Exception {
+
+        if (args.length != 2) {
+            System.err.println("Usage: java TCPClient <IPaddress> <port>");
+            System.exit(1);
+        }
+
+        serverAddress = args[0];
+        serverPort = Integer.parseInt(args[1]);
+
+        TCPClient tcpClient = new TCPClient(serverAddress, serverPort);
+        tcpClient.run();
     }
 }
