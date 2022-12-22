@@ -22,7 +22,6 @@ public class TCPClient {
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
 
-            //On récupère le message
             InputStream input = socket.getInputStream();
             BufferedReader readMsgReceived = new BufferedReader(new InputStreamReader(input));
 

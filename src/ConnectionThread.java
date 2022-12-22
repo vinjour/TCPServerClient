@@ -3,8 +3,10 @@ import java.net.*;
 
 
 public class ConnectionThread extends Thread {
-    private Socket socket = null;
-    public InputStream input = null;
+    static Socket socket = null;
+    static InputStream input = null;
+    int port;
+
 
     public ConnectionThread(Socket socket, InputStream input) {
         super("TCPMultiServer");
@@ -14,10 +16,9 @@ public class ConnectionThread extends Thread {
 
     public void run() {
 
-        try () {
+        try {
 
             boolean connected = true;
-
             System.out.println("New client connected\n");
 
             InputStream input = socket.getInputStream();
