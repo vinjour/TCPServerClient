@@ -34,8 +34,7 @@ public class TCPMultiServer {
         while (listening) {
 
             clientSocket = serverSocket.accept();
-            System.out.println("New client connected");
-            client.run();
+            client.run(serverSocket);
         }
         serverSocket.close();
     }

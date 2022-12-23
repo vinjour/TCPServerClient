@@ -41,9 +41,9 @@ public class TCPServer {
         serverSocket.close();
     }
 
-    private String receiveMessage(Socket socket) throws IOException {
-        InetAddress clientAddress = socket.getInetAddress();
-        int clientPort = socket.getPort();
+    private String receiveMessage(Socket clientSocket) throws IOException {
+        InetAddress clientAddress = clientSocket.getInetAddress();
+        int clientPort = clientSocket.getPort();
 
         readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
         String sentence = readMsgReceived.readLine();

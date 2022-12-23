@@ -11,6 +11,7 @@ public class ConnectionThread extends Thread {
     BufferedReader readMsgReceived;
     PrintWriter writer;
 
+    InetAddress clientAddress;
     int clientPort;
 
     public ConnectionThread(Socket clientSocket, InputStream receiveData) {
@@ -22,23 +23,25 @@ public class ConnectionThread extends Thread {
     public void run(ServerSocket serverSocket) throws IOException {
         boolean listening = true;
         clientSocket = serverSocket.accept();
+        clientAddress = clientSocket.getInetAddress();
+        clientPort = clientSocket.getPort();
+
+        System.out.println("New client connected : " + clientAddress + ":" + clientPort + "\n");
 
         while (listening) {
 
-            String sentence = receiveMessage(clientSocket);
+            String sentence = receiveMessage();
             sendMessage(clientSocket, sentence);
         }
         serverSocket.close();
     }
 
-    private String receiveMessage(Socket socket) throws IOException {
-        InetAddress clientAddress = socket.getInetAddress();
-        int clientPort = socket.getPort();
+    private String receiveMessage() throws IOException {
 
         readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
         String sentence = readMsgReceived.readLine();
 
-        System.out.println("From client at: " + clientAddress + ":" + clientPort);
+        System.out.println("From : " + clientAddress + ":" + clientPort);
         System.out.println(sentence+"\n");
         return sentence;
     }
