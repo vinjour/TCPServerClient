@@ -3,73 +3,60 @@ import java.net.*;
 
 
 public class ConnectionThread extends Thread {
-    static Socket socket = null;
-    static InputStream input = null;
-    int port;
 
+    static Socket clientSocket;
+    static ServerSocket serverSocket;
+    static InputStream receiveData;
+    OutputStream sendData;
+    BufferedReader readMsgReceived;
+    PrintWriter writer;
 
-    public ConnectionThread(Socket socket, InputStream input) {
+    int clientPort;
+
+    public ConnectionThread(Socket clientSocket, InputStream receiveData) {
         super("TCPMultiServer");
-        this.socket = socket;
-        this.input = input;
+        this.clientSocket = clientSocket;
+        this.receiveData = receiveData;
     }
 
-    public void run() {
+    public void run(ServerSocket serverSocket) throws IOException {
+        boolean listening = true;
+        clientSocket = serverSocket.accept();
 
-        try {
+        while (listening) {
 
-            boolean connected = true;
-            System.out.println("New client connected\n");
-
-            InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-
-            OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
-
-            InetAddress IPclient = socket.getInetAddress();
-            int clientPort = socket.getPort();
-
-            while (connected) {
-
-                String text = reader.readLine();
-
-                System.out.println("From client at: " + IPclient + ":" + clientPort);
-                System.out.println(text+"\n");
-                writer.println(text);
-
-                if (!reader.equals("bye")) {
-                    break;
-                }
-            }
-            connected = false;
-            socket.close();
-
-        } catch (IOException ex) {
-            System.out.println("Server exception: " + ex.getMessage());
-            ex.printStackTrace();
+            String sentence = receiveMessage(clientSocket);
+            sendMessage(clientSocket, sentence);
         }
+        serverSocket.close();
     }
 
-    public void launch() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+    private String receiveMessage(Socket socket) throws IOException {
+        InetAddress clientAddress = socket.getInetAddress();
+        int clientPort = socket.getPort();
 
-            boolean connected = true;
+        readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
+        String sentence = readMsgReceived.readLine();
 
-            socket = serverSocket.accept();
-            System.out.println("New client connected\n");
+        System.out.println("From client at: " + clientAddress + ":" + clientPort);
+        System.out.println(sentence+"\n");
+        return sentence;
+    }
 
-            InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+    private void sendMessage(Socket socket, String sentence) throws IOException {
+        sendData = socket.getOutputStream();
+        writer = new PrintWriter(sendData, true);
+        writer.println(sentence);
+    }
 
-            OutputStream output = socket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
+    public static void main(String[] args) throws Exception {
 
-            InetAddress IPclient = socket.getInetAddress();
-            int clientPort = socket.getPort();
-        } catch (IOException ex) {
-            System.out.println("Server exception: " + ex.getMessage());
-            ex.printStackTrace();
+        if (args.length != 1) {
+            System.err.println("Usage: java TCPServer <port>");
+            System.exit(1);
         }
+
+        ConnectionThread connectionThread = new ConnectionThread(clientSocket, receiveData);
+        connectionThread.run(serverSocket);
     }
 }
