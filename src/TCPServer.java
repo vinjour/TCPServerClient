@@ -31,10 +31,10 @@ public class TCPServer {
 
     public void launch() throws IOException {
         boolean listening = true;
+        clientSocket = serverSocket.accept();
 
         while (listening) {
 
-            clientSocket = serverSocket.accept();
             String sentence = receiveMessage(clientSocket);
             sendMessage(clientSocket, sentence);
         }
@@ -45,7 +45,6 @@ public class TCPServer {
         InetAddress clientAddress = socket.getInetAddress();
         int clientPort = socket.getPort();
 
-        receiveData = socket.getInputStream();
         readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
         String sentence = readMsgReceived.readLine();
 
@@ -60,7 +59,7 @@ public class TCPServer {
         writer.println(sentence);
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
 
         if (args.length != 1) {
             System.err.println("Usage: java TCPServer <port>");

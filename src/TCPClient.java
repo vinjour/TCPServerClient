@@ -15,7 +15,7 @@ public class TCPClient {
     static int serverPort;
     static int TIMER_SIZE = 10000;  // Milliseconds
 
-    public TCPClient(String serverAddress, int serverPort) throws IOException {
+    public TCPClient(String serverAddress, int serverPort) {
         try {
             clientSocket = new Socket(serverAddress, serverPort);
 
@@ -62,7 +62,7 @@ public class TCPClient {
         System.out.println(ReceivedMessage + "\n");
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
 
         if (args.length != 2) {
             System.err.println("Usage: java TCPClient <IPaddress> <port>");
