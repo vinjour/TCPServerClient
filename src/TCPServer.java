@@ -21,7 +21,7 @@ public class TCPServer {
             System.err.println(ex);
             System.exit(1);
 
-        }catch (IOException ex) {
+        } catch (IOException ex) {
             System.err.println(ex);
             System.exit(1);
         }

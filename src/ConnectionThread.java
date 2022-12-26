@@ -5,49 +5,41 @@ import java.net.*;
 public class ConnectionThread extends Thread {
 
     static Socket clientSocket;
-    static ServerSocket serverSocket;
     static InputStream receiveData;
     OutputStream sendData;
-    BufferedReader readMsgReceived;
-    PrintWriter writer;
+    BufferedReader readMsgReceived = null;
+    PrintWriter writer = null;
 
     InetAddress clientAddress;
     int clientPort;
 
-    public ConnectionThread(Socket clientSocket, InputStream receiveData) {
+    public ConnectionThread(Socket clientSocket) {
         super("TCPMultiServer");
         this.clientSocket = clientSocket;
-        this.receiveData = receiveData;
     }
 
-    public void run(ServerSocket serverSocket) throws IOException {
+    public void clientHandler() throws IOException {
         boolean listening = true;
-        clientSocket = serverSocket.accept();
-        clientAddress = clientSocket.getInetAddress();
-        clientPort = clientSocket.getPort();
 
-        System.out.println("New client connected : " + clientAddress + ":" + clientPort + "\n");
-
-        while (listening) {
+        while (receiveData != null) {
 
             String sentence = receiveMessage();
-            sendMessage(clientSocket, sentence);
+            sendMessage(sentence);
         }
-        serverSocket.close();
     }
 
     private String receiveMessage() throws IOException {
 
         readMsgReceived = new BufferedReader(new InputStreamReader(receiveData));
         String sentence = readMsgReceived.readLine();
-
         System.out.println("From : " + clientAddress + ":" + clientPort);
         System.out.println(sentence+"\n");
         return sentence;
     }
 
-    private void sendMessage(Socket socket, String sentence) throws IOException {
-        sendData = socket.getOutputStream();
+    private void sendMessage(String sentence) throws IOException {
+
+        sendData = clientSocket.getOutputStream();
         writer = new PrintWriter(sendData, true);
         writer.println(sentence);
     }
@@ -59,7 +51,7 @@ public class ConnectionThread extends Thread {
             System.exit(1);
         }
 
-        ConnectionThread connectionThread = new ConnectionThread(clientSocket, receiveData);
-        connectionThread.run(serverSocket);
+        ConnectionThread connectionThread = new ConnectionThread(clientSocket);
+        connectionThread.clientHandler();
     }
 }
